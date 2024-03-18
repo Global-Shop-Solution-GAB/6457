@@ -1,0 +1,990 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.FormWOHist..Create(BaseForm)
+Gui.FormWOHist..Caption("WO History [6457]")
+Gui.FormWOHist..Size(1045,630)
+Gui.FormWOHist..MinX(0)
+Gui.FormWOHist..MinY(0)
+Gui.FormWOHist..Position(0,0)
+Gui.FormWOHist..AlwaysOnTop(False)
+Gui.FormWOHist..FontName("Tahoma")
+Gui.FormWOHist..FontSize(8.25)
+Gui.FormWOHist..ControlBox(True)
+Gui.FormWOHist..MaxButton(True)
+Gui.FormWOHist..MinButton(True)
+Gui.FormWOHist..MousePointer(0)
+Gui.FormWOHist..Moveable(True)
+Gui.FormWOHist..Sizeable(True)
+Gui.FormWOHist..ShowInTaskBar(True)
+Gui.FormWOHist..TitleBar(True)
+Gui.FormWOHist..Event(UnLoad,FormWOHist_UnLoad)
+Gui.FormWOHist.lbl1.Create(Label,"Part",True,20,13,0,56,21,True,0,"Tahoma",8.25,,0,0)
+Gui.FormWOHist.lbl1.BorderStyle(0)
+Gui.FormWOHist.cmdRefresh.Create(Button)
+Gui.FormWOHist.cmdRefresh.Enabled(True)
+Gui.FormWOHist.cmdRefresh.Visible(True)
+Gui.FormWOHist.cmdRefresh.Zorder(0)
+Gui.FormWOHist.cmdRefresh.Size(59,26)
+Gui.FormWOHist.cmdRefresh.Position(317,16)
+Gui.FormWOHist.cmdRefresh.Caption("")
+Gui.FormWOHist.cmdRefresh.FontName("Tahoma")
+Gui.FormWOHist.cmdRefresh.FontSize(8.25)
+Gui.FormWOHist.cmdRefresh.SvgPicture("icon_refresh_color")
+Gui.FormWOHist.cmdRefresh.ImageAlign(5)
+Gui.FormWOHist.cmdRefresh.Event(Click,cmdRefresh_Click)
+Gui.FormWOHist.txt_Part.Create(TextBox,"",True,150,20,0,94,19,True,0,"Tahoma",8.25,,1)
+Gui.FormWOHist.picGSSLogo.Create(PictureBox)
+Gui.FormWOHist.picGSSLogo.Enabled(True)
+Gui.FormWOHist.picGSSLogo.Visible(True)
+Gui.FormWOHist.picGSSLogo.Zorder(0)
+Gui.FormWOHist.picGSSLogo.Size(375,75)
+Gui.FormWOHist.picGSSLogo.Position(474,10)
+Gui.FormWOHist.picGSSLogo.Anchor(13)
+Gui.FormWOHist.gsgcWOHist.Create(GsGridControl)
+Gui.FormWOHist.gsgcWOHist.Enabled(True)
+Gui.FormWOHist.gsgcWOHist.Visible(True)
+Gui.FormWOHist.gsgcWOHist.Zorder(0)
+Gui.FormWOHist.gsgcWOHist.Size(1013,491)
+Gui.FormWOHist.gsgcWOHist.Position(17,93)
+Gui.FormWOHist.gsgcWOHist.Anchor(15)
+Gui.FormWOHist.gsgc_Export.Create(GsGridControl)
+Gui.FormWOHist.gsgc_Export.Enabled(True)
+Gui.FormWOHist.gsgc_Export.Visible(False)
+Gui.FormWOHist.gsgc_Export.Zorder(0)
+Gui.FormWOHist.gsgc_Export.Size(943,7)
+Gui.FormWOHist.gsgc_Export.Position(21,588)
+Gui.FormWOHist.chkHistory.Create(CheckBox)
+Gui.FormWOHist.chkHistory.Enabled(True)
+Gui.FormWOHist.chkHistory.Visible(True)
+Gui.FormWOHist.chkHistory.Zorder(0)
+Gui.FormWOHist.chkHistory.Size(102,20)
+Gui.FormWOHist.chkHistory.Position(94,54)
+Gui.FormWOHist.chkHistory.Caption("Include History")
+Gui.FormWOHist.chkHistory.FontName("Tahoma")
+Gui.FormWOHist.chkHistory.FontSize(8.25)
+Gui.FormWOHist.cmdBrowse.Create(Button)
+Gui.FormWOHist.cmdBrowse.Enabled(True)
+Gui.FormWOHist.cmdBrowse.Visible(True)
+Gui.FormWOHist.cmdBrowse.Zorder(0)
+Gui.FormWOHist.cmdBrowse.Size(27,23)
+Gui.FormWOHist.cmdBrowse.Position(255,18)
+Gui.FormWOHist.cmdBrowse.Caption("")
+Gui.FormWOHist.cmdBrowse.FontName("Tahoma")
+Gui.FormWOHist.cmdBrowse.FontSize(8.25)
+Gui.FormWOHist.cmdBrowse.SvgPicture("icon_browser_color")
+Gui.FormWOHist.cmdBrowse.Event(Click,cmdBrowse_Click)
+Gui.FormWOHist.chk_AllRevs.Create(CheckBox)
+Gui.FormWOHist.chk_AllRevs.Enabled(True)
+Gui.FormWOHist.chk_AllRevs.Visible(True)
+Gui.FormWOHist.chk_AllRevs.Zorder(0)
+Gui.FormWOHist.chk_AllRevs.Size(89,20)
+Gui.FormWOHist.chk_AllRevs.Position(208,54)
+Gui.FormWOHist.chk_AllRevs.Caption("All Revisions")
+Gui.FormWOHist.chk_AllRevs.FontName("Tahoma")
+Gui.FormWOHist.chk_AllRevs.FontSize(8.25)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+V.Global.bLoadData.Declare(Boolean)
+V.Global.sPart.Declare(String)
+V.Global.sError.Declare(String)
+V.Global.sPartNo.Declare(String)
+V.Global.sRev.Declare(String)
+
+Program.Sub.Preflight.End
+Program.Sub.Main.Start
+'Author: Arturo Almaguer
+'Date: August 5th 2021
+'Customer: Harbour Manufacturing Inc, quote number 12849
+'Custom WO History dashboard launched off custom menu item created under SFC - View - 6457 WO Dashboard
+
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+
+F.Intrinsic.Control.Try
+	
+	V.Local.sGSSLogo.Declare(String)
+	
+	'Displaying GSS Logo on dashboard
+	F.Intrinsic.String.Build("{0}\ART\GAB_GSS_Logo_Green_Dash.png", V.Caller.GlobalDir, V.Local.sGSSLogo)
+	GUI.FormWOHist.picGSSLogo.Picture(V.Local.sGSSLogo)
+	
+	'Calling subs and showing form
+	F.Intrinsic.Control.CallSub(PartBrowser)
+	F.Intrinsic.Control.CallSub(LoadData)
+	F.Intrinsic.Control.CallSub(CallDictionaries)
+	F.Intrinsic.Control.CallSub(ExportCheckbox)
+	F.Intrinsic.Control.CallSub(ExpressionColumns)
+	F.Intrinsic.Control.CallSub(LoadGrid)
+	F.Intrinsic.Control.CallSub(SetContextMenu)
+	F.Intrinsic.Control.CallSub(Deserialize)
+	
+	'Setting text 
+	GUI.FormWOHist.txt_Part.Text(V.Global.sPart)
+	
+	'Showing form
+	GUI.FormWOHist..Show
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.Main.End
+Program.Sub.SetContextMenu.Start
+'Creates the context menus and its items
+
+F.Intrinsic.Control.Try
+
+	GUI.FormWOHist..ContextMenuCreate("ctxgsgcWOHist")
+	GUI.FormWOHist.gsgcWOHist.ContextMenuAttach("ctxgsgcWOHist")
+	GUI.FormWOHist..ContextMenuAddItem("ctxgsgcWOHist","Export",0,"Export")
+	GUI.FormWOHist..ContextMenuAddItem("ctxgsgcWOHist","ResetColumns",0,"Reset Columns")
+	GUI.FormWOHist..ContextMenuAddItem("ctxgsgcWOHist","SelectAll",0,"Select All")
+	GUI.FormWOHist..ContextMenuAddItem("ctxgsgcWOHist","UnselectAll",0,"Unselect All")
+	
+	GUI.FormWOHist..ContextMenuSetItemEventHandler("ctxgsgcWOHist","Export","MenuClickExport")
+	GUI.FormWOHist..ContextMenuSetItemEventHandler("ctxgsgcWOHist","ResetColumns","MenuClickResetColumns")
+	GUI.FormWOHist..ContextMenuSetItemEventHandler("ctxgsgcWOHist","SelectAll","MenuClickSA")
+	GUI.FormWOHist..ContextMenuSetItemEventHandler("ctxgsgcWOHist","UnselectAll","MenuClickSA")
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.SetContextMenu.End
+Program.Sub.MenuClickExport.Start
+'Exports dashboard to excel file or csv if Excel isn't installed
+
+F.Intrinsic.Control.Try
+
+	V.Local.sFileExport.Declare(String)
+	V.Local.bExcel.Declare(String)
+	V.Local.sMessage.Declare(String)
+	V.Local.sSerialize.Declare(String)
+	V.Local.sPart.Declare(String)
+	
+	V.Local.sPart.Set(V.Global.sPart)
+	
+	'Creating a dataview to filter out non export records and creating a gsgc for this dataview, which is invisible in the form
+	GUI.FormWOHist.gsgcWOHist.Serialize("gvWOHistory", V.Local.sSerialize)
+	F.Data.DataView.Create("dtWOHistory", "dvExport", 22,"[EXPORT] = 'True'","")	
+	GUI.FormWOHist.gsgc_Export.AddGridviewFromDataview("gvExport", "dtWOHistory", "dvExport")
+	'TR 8/12/2022 Added this to resolve 'MainView not set' error when deserializing
+	Gui.FormWOHist.gsgc_Export.MainView("gvExport")
+	'''''''''''''''''''''''''''''''''''''''''''''''''''''
+	GUI.FormWOHist.gsgc_Export.Deserialize(V.Local.sSerialize)
+	F.Intrinsic.Control.CallSub("LoadGridExport")
+	
+	'Folder browser to allow the user to select the export path
+	F.Intrinsic.UI.FolderBrowser("Select the path to export the gridview", "", V.Local.sFileExport)
+	F.Intrinsic.Control.If(V.Local.sFileExport.IsNotCancel)
+	
+		F.Automation.MSExcel.CheckPresence(V.Local.bExcel)
+		F.Intrinsic.Control.If(V.Local.bExcel, =, True) 
+			
+			F.Intrinsic.String.Replace(V.Local.sPart, "*", "-", V.Local.sPart)
+			F.Intrinsic.String.Build("{0}\{1} WO History Dashboard.xlsx", V.Local.sFileExport, V.Local.sPart, V.Local.sFileExport)
+			GUI.FormWOHist.gsgc_Export.Export(V.Local.sFileExport,"xlsx")
+			F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+			
+		F.Intrinsic.Control.Else
+			
+			F.Intrinsic.String.Replace(V.Local.sPart, "*", "-", V.Local.sPart)
+			F.Intrinsic.String.Build("{0}\{1} WO History Dashboard.csv", V.Local.sFileExport, V.Local.sPart, V.Local.sFileExport)
+			GUI.FormWOHist.gsgc_Export.Export(V.Local.sFileExport,"csv")
+			F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+			
+		F.Intrinsic.Control.EndIf
+		
+		'Displaying exported path to user
+		F.Intrinsic.String.Build("File has been exported to {0}", V.Local.sFileExport, V.Local.sMessage)
+		F.Intrinsic.UI.Msgbox(V.Local.sMessage)
+		
+	F.Intrinsic.Control.Else
+	
+		F.Intrinsic.UI.Msgbox("Exported file wasn't generated. Export path required to export", "Required Field")
+		
+	F.Intrinsic.Control.EndIf
+	
+	'Closing dataview
+	F.Data.DataView.Close("dtWOHistory", "dvExport")
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.MenuClickExport.End
+Program.Sub.LoadData.Start
+'Loading data
+
+F.Intrinsic.Control.Try
+
+	V.Local.sSQL.Declare(String)
+	
+	F.Intrinsic.Control.If(V.DataTable.dtWOHistory.Exists)
+		F.Data.DataTable.Close("dtWOHistory")
+	F.Intrinsic.Control.EndIf
+		
+	V.Global.bLoadData.Set(True)
+	
+	'Selecting all records from JOB HEADER
+	F.ODBC.Connection!Con.OpenCompanyConnection
+	F.Intrinsic.Control.If(V.Screen.FormWOHist!chk_AllRevs.Value,=,1)
+		
+		F.Intrinsic.String.Build("select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, RTRIM(JOB) + '-' + RTRIM(SUFFIX) WORK_ORDER, PART, DATE_CLOSED, QTY_ORDER, QTY_COMPLETED, NUM_HOURS, AMT_MATERIAL, AMT_LABOR, AMT_OVERHEAD, FREIGHT, OTHER, OUTS from V_JOB_HEADER where PART like '{0}%' and DATE_CLOSED <> '1900-01-01' and QTY_COMPLETED <> '0' order by DATE_CLOSED DESC;", V.Global.sPartNo, V.Local.sSQL)
+		F.Data.DataTable.CreateFromSQL("dtWOHistory", "Con", V.Local.sSQL, True)
+		
+		F.Intrinsic.Control.If(V.Screen.FormWOHist!chkHistory.Value,=,1)
+		
+			'Adding history data if option is checked
+			F.Intrinsic.String.Build("select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, RTRIM(JOB) + '-' + RTRIM(SUFFIX) WORK_ORDER, PART, DATE_CLOSED, QTY_ORDER, QTY_COMPLETED, NUM_HOURS, AMT_MATERIAL, AMT_LABOR, AMT_OVERHEAD, FREIGHT, OTHER, OUTS FROM V_JOB_HIST_MAST where PART like '{0}%' and QTY_COMPLETED <> '0' order by DATE_CLOSED DESC;", V.Global.sPartNo, V.Local.sSQL)
+			F.Data.DataTable.CreateFromSQL("dtWOHistory1", "Con", V.Local.sSQL, True)
+		
+		F.Intrinsic.Control.EndIf
+		
+	F.Intrinsic.Control.Else
+		
+		F.Intrinsic.String.Build("select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, RTRIM(JOB) + '-' + RTRIM(SUFFIX) WORK_ORDER, PART, DATE_CLOSED, QTY_ORDER, QTY_COMPLETED, NUM_HOURS, AMT_MATERIAL, AMT_LABOR, AMT_OVERHEAD, FREIGHT, OTHER, OUTS from V_JOB_HEADER where PART = '{0}' and DATE_CLOSED <> '1900-01-01' and QTY_COMPLETED <> '0' order by DATE_CLOSED DESC;", V.Global.sPart, V.Local.sSQL)
+		F.Data.DataTable.CreateFromSQL("dtWOHistory", "Con", V.Local.sSQL, True)
+		
+		F.Intrinsic.Control.If(V.Screen.FormWOHist!chkHistory.Value,=,1)
+		
+			'Adding history data if option is checked
+			F.Intrinsic.String.Build("select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, RTRIM(JOB) + '-' + RTRIM(SUFFIX) WORK_ORDER, PART, DATE_CLOSED, QTY_ORDER, QTY_COMPLETED, NUM_HOURS, AMT_MATERIAL, AMT_LABOR, AMT_OVERHEAD, FREIGHT, OTHER, OUTS FROM V_JOB_HIST_MAST where PART = '{0}' and QTY_COMPLETED <> '0' order by DATE_CLOSED DESC;", V.Global.sPart, V.Local.sSQL)
+			F.Data.DataTable.CreateFromSQL("dtWOHistory1", "Con", V.Local.sSQL, True)
+	
+		F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.EndIf
+	F.ODBC.Connection!Con.Close
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.LoadData.End
+Program.Sub.LoadGrid.Start
+'Creating gridview
+F.Intrinsic.Control.Try
+
+	GUI.FormWOHist.gsgcWOHist.AddGridviewFromDatatable("gvWOHistory", "dtWOHistory")
+	
+	''General Gridview properties
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!EnableAppearanceOddRow, True)
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!RowAutoHeight, True)
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!SuppressNothingDates, True)
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!ColumnPanelRowHeight, 45)
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!ShowDetailTabs, True) 
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", V.Enum.GridViewPropertyNames!EnableAppearanceFocusedRow, True) 
+	GUI.FormWOHist.gsgcWOHist.SetGridviewProperty("gvWOHistory", "OptionsViewColumnAutoWidth", False) 'It allows the user to adjust the column widths
+	
+	''Column properties
+	'Invisible columns
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","JS","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","AMT_MATERIAL","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","AMT_LABOR","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","AMT_OVERHEAD","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","FREIGHT","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","OTHER","Visible",False)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory","OUTS","Visible",False)
+	
+	'WO column fixed
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "WORK_ORDER", V.Enum.ColumnPropertyNames!Fixed, "Left")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!Fixed, "Left")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PART", V.Enum.ColumnPropertyNames!Fixed, "Left")
+	
+	'Headers text wrapping
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	
+	'Formatting captions
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "DATE_CLOSED", V.Enum.ColumnPropertyNames!Caption, "Date Closed")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "WORK_ORDER", V.Enum.ColumnPropertyNames!Caption, "Work Order")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_ORDER", V.Enum.ColumnPropertyNames!Caption, "Order Qty")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!Caption, "Include Export")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SP", V.Enum.ColumnPropertyNames!Caption, "Scrap Qty")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!Caption, "Completed")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!Caption, "Est Setup Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!Caption, "Est Run Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!Caption, "Unattended Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!Caption, "Production Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "NUM_HOURS", V.Enum.ColumnPropertyNames!Caption, "Actual Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ISSUED_QTY", V.Enum.ColumnPropertyNames!Caption, "Issued")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!Caption, "Production Hours/Part")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!Caption, "Production Mins/Part")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Material Cost/Piece")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Outside Cost/Piece")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Cost/Piece")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Material Cost")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Outside Cost")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Actual Cost")
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!Caption, "Total Hours/Part")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!Caption, "Total Mins/Part")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!Caption, "Actual Setup Hours")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PART", V.Enum.ColumnPropertyNames!Caption, "Part+Rev")
+	
+	'Formatting headers
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "DATE_CLOSED", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "WORK_ORDER", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_ORDER", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "NUM_HOURS", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ISSUED_QTY", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	
+	'Formatting headers allignment
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_ORDER", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "NUM_HOURS", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ISSUED_QTY", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	
+	'Formatting widths
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "DATE_CLOSED", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "WORK_ORDER", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_ORDER", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SP", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "NUM_HOURS", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ISSUED_QTY", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PART", V.Enum.ColumnPropertyNames!MinWidth, 120)
+	
+	'Enable EXPORT column to be checked/unchecked
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!AllowEdit, True)
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "EXPORT", V.Enum.ColumnPropertyNames!ReadOnly, False)
+	
+	'Formatting dates
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "DATE_CLOSED", V.Enum.ColumnPropertyNames!DisplayCustomDateTime, "d")
+	
+	'Formatting numbers
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_ORDER", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "SETUP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "RUN", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "UH", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PH", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "NUM_HOURS", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ISSUED_QTY", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "MINS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	
+	'Formatting amounts
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgcWOHist.SetColumnProperty("gvWOHistory", "ACT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	
+	'Summary items
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "QTY_ORDER", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "SP", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "QTY_COMPLETED", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "UH", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "PH", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "ISSUED_QTY", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgcWOHist.AddSummaryItem("gvWOHistory", "ACTUAL_SETUP", "PriceAVG", "AVERAGE", "Average: ", "", n2) 'n2 =  "#,##0.00"
+	
+	'Displaying gv
+	GUI.FormWOHist.gsgcWOHist.MainView("gvWOHistory")
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.LoadGrid.End
+Program.Sub.ExpressionColumns.Start
+'Creating required expression columns
+
+F.Intrinsic.Control.Try
+
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "PH", "Float","NUM_HOURS - UH - ACTUAL_SETUP")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ISSUED_QTY", "Float","SP + QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "PROD_HOURS_PART", "Float","PH / QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "MINS_PART", "Float","PROD_HOURS_PART * 60")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "TOTAL_HOURS_PART", "Float","NUM_HOURS / QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "TOTAL_MINS_PART", "Float","TOTAL_HOURS_PART * 60")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_MAT_COST_PIECE", "Float","AMT_MATERIAL / QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_MAT_COST", "Float","AMT_MATERIAL * QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_OUT_COST_PIECE", "Float","OUTS / QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_OUT_COST", "Float","OUTS * QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_COST_PIECE", "Float","(AMT_MATERIAL + AMT_LABOR + AMT_OVERHEAD + OUTS + FREIGHT + OTHER) / QTY_COMPLETED")
+	F.Data.DataTable.AddExpressionColumn("dtWOHistory", "ACT_COST", "Float","(AMT_MATERIAL + AMT_LABOR + AMT_OVERHEAD + OUTS + FREIGHT + OTHER) * QTY_COMPLETED")
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.ExpressionColumns.End
+Program.Sub.FormWOHist_UnLoad.Start
+GUI.FormWOHist..Visible(False)
+
+F.Intrinsic.Control.If(V.Global.bLoadData)
+	F.Intrinsic.Control.CallSub(Serialize)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.End
+
+Program.Sub.FormWOHist_UnLoad.End
+Program.Sub.MenuClickResetColumns.Start
+'Deleting saved serializations
+
+F.Intrinsic.Control.Try
+
+	F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"gvWOHistory",6457,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,"")
+	
+	'Prevent RefreshScreen from doing Serialize.
+	V.Global.bLoadData.Set(False)
+	
+	F.Intrinsic.Control.CallSub(cmdRefresh_Click)
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.MenuClickResetColumns.End
+Program.Sub.MenuClickSA.Start
+'Select all or unselect all context menus
+
+F.Intrinsic.Control.Try
+
+	F.Intrinsic.Control.If(V.Args.ItemName,=,"SELECTALL")
+		F.Data.DataTable.SetValue("dtWOHistory",-1,"EXPORT",True)
+	F.Intrinsic.Control.ElseIf(V.Args.ItemName,=,"UNSELECTALL")
+	F.Data.DataTable.SetValue("dtWOHistory",-1,"EXPORT",False)
+	F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.MenuClickSA.End
+Program.Sub.Serialize.Start
+F.Intrinsic.Control.Try
+
+	V.Local.sSerialize.Declare(String)
+	
+	'For gvWOHistory
+	GUI.FormWOHist.gsgcWOHist.Serialize("gvWOHistory", V.Local.sSerialize)
+	F.Global.Registry.AddValue(V.Caller.User, V.Caller.CompanyCode,"gvWOHistory",6457,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM, V.Local.sSerialize)
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.Serialize.End
+Program.Sub.Deserialize.Start
+F.Intrinsic.Control.Try
+
+	V.Local.sSerialize.Declare(String)
+	
+	'For gvWOHistory
+	F.Global.Registry.ReadValue(V.Caller.User,V.Caller.CompanyCode,"gvWOHistory",6457,1000,6,"",V.Local.sSerialize)
+	F.Intrinsic.Control.If(V.Local.sSerialize.Trim,<>,"")
+		GUI.FormWOHist.gsgcWOHist.Deserialize(V.Local.sSerialize)
+	F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.Deserialize.End
+Program.Sub.cmdRefresh_Click.Start
+F.Intrinsic.Control.Try
+
+	F.Intrinsic.Control.If(V.Global.bLoadData)
+		F.Intrinsic.Control.CallSub(Serialize)
+	F.Intrinsic.Control.EndIf
+	
+	GUI.FormWOHist.gsgcWOHist.Visible(False)
+	GUI.FormWOHist.gsgcWOHist.SuspendLayout()
+		F.Intrinsic.Control.CallSub(LoadData)
+		F.Intrinsic.Control.CallSub(CallDictionaries)
+		F.Intrinsic.Control.CallSub(ExportCheckbox)
+		F.Intrinsic.Control.CallSub(ExpressionColumns)
+		F.Intrinsic.Control.CallSub(LoadGrid)
+		F.Intrinsic.Control.CallSub(Deserialize)
+	GUI.FormWOHist.gsgcWOHist.ResumeLayout()
+	GUI.FormWOHist.gsgcWOHist.Visible(True)
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.cmdRefresh_Click.End
+Program.Sub.CatchError.Start
+F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}", V.Ambient.ScriptPath, V.Ambient.Newline, V.Ambient.SubroutineCalledFrom, V.Ambient.ErrorNumber, V.Ambient.ErrorDescription, V.Ambient.GABVersion, V.Global.sError) 
+F.Intrinsic.UI.Msgbox(V.Global.sError)
+F.Intrinsic.Control.End()
+Program.Sub.CatchError.End
+Program.Sub.LoadGridExport.Start
+'Formatting the export gv exactly as gsgcWOHist (main gv)
+F.Intrinsic.Control.Try
+
+	''General Gridview properties
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!EnableAppearanceOddRow, True)
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!RowAutoHeight, True)
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!SuppressNothingDates, True)
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!ColumnPanelRowHeight, 45)
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!ShowDetailTabs, True) 
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", V.Enum.GridViewPropertyNames!EnableAppearanceFocusedRow, True) 
+	GUI.FormWOHist.gsgc_Export.SetGridviewProperty("gvExport", "OptionsViewColumnAutoWidth", False) 'It allows the user to adjust the column widths
+	
+	''Column properties
+	'Invisible columns
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","JS","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","AMT_MATERIAL","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","AMT_LABOR","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","AMT_OVERHEAD","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","FREIGHT","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","OTHER","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","OUTS","Visible",False)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport","EXPORT","Visible",False)
+	
+	'WO column fixed
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "WORK_ORDER", V.Enum.ColumnPropertyNames!Fixed, "Left")
+	
+	'Headers text wrapping
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderWordWrap, "Wrap")
+	
+	'Formatting captions
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "DATE_CLOSED", V.Enum.ColumnPropertyNames!Caption, "Date Closed")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "WORK_ORDER", V.Enum.ColumnPropertyNames!Caption, "Work Order")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_ORDER", V.Enum.ColumnPropertyNames!Caption, "Order Qty")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!Caption, "Include Export")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SP", V.Enum.ColumnPropertyNames!Caption, "Scrap Qty")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!Caption, "Completed")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!Caption, "Est Setup Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!Caption, "Est Run Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!Caption, "Unattended Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!Caption, "Production Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "NUM_HOURS", V.Enum.ColumnPropertyNames!Caption, "Actual Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ISSUED_QTY", V.Enum.ColumnPropertyNames!Caption, "Issued")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!Caption, "Production Hours/Part")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!Caption, "Production Mins/Part")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Material Cost/Piece")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Outside Cost/Piece")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!Caption, "Act Cost/Piece")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Material Cost")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Outside Cost")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!Caption, "Extended Actual Cost")
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!Caption, "Total Hours/Part")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!Caption, "Total Mins/Part")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!Caption, "Actual Setup Hours")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PART", V.Enum.ColumnPropertyNames!Caption, "Part+Rev")
+	
+	'Formatting headers
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "DATE_CLOSED", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "WORK_ORDER", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_ORDER", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "NUM_HOURS", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ISSUED_QTY", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PART", V.Enum.ColumnPropertyNames!HeaderFontBold, True)
+	
+	'Formatting headers allignment
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_ORDER", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "NUM_HOURS", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ISSUED_QTY", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PART", V.Enum.ColumnPropertyNames!HeaderHAlignment, "Center")
+	
+	'Formatting widths
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "DATE_CLOSED", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "WORK_ORDER", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_ORDER", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SP", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "NUM_HOURS", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ISSUED_QTY", V.Enum.ColumnPropertyNames!MinWidth, 80)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!MinWidth, 100)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PART", V.Enum.ColumnPropertyNames!MinWidth, 120)
+	
+	'Enable EXPORT column to be checked/unchecked
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!AllowEdit, True)
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "EXPORT", V.Enum.ColumnPropertyNames!ReadOnly, False)
+	
+	'Formatting dates
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "DATE_CLOSED", V.Enum.ColumnPropertyNames!DisplayCustomDateTime, "d")
+	
+	'Formatting numbers
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_ORDER", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "QTY_COMPLETED", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "SETUP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "RUN", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "UH", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PH", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "NUM_HOURS", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ISSUED_QTY", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "PROD_HOURS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "MINS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_HOURS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "TOTAL_MINS_PART", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACTUAL_SETUP", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "#,##0.00")
+	
+	'Formatting amounts
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST_PIECE", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_MAT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_OUT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	GUI.FormWOHist.gsgc_Export.SetColumnProperty("gvExport", "ACT_COST", V.Enum.ColumnPropertyNames!DisplayCustomNumeric, "$#,##0.00")
+	
+	'Summary items
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "QTY_ORDER", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "SP", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "QTY_COMPLETED", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "UH", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "PH", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "ISSUED_QTY", "PriceTotal", "SUM", "Total: ", "", n2) 'n2 =  "#,##0.00"
+	GUI.FormWOHist.gsgc_Export.AddSummaryItem("gvExport", "ACTUAL_SETUP", "PriceAVG", "AVERAGE", "Average: ", "", n2) 'n2 =  "#,##0.00"
+	
+	'Displaying gv
+	GUI.FormWOHist.gsgc_Export.MainView("gvExport")
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.LoadGridExport.End
+Program.Sub.CallDictionaries.Start
+F.Intrinsic.Control.Try
+
+	F.ODBC.Connection!Con.OpenCompanyConnection
+	
+	'Dictionary to get the sum of scrap pieces for a job
+	F.Data.Dictionary.CreateFromSQL("dictSP", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(PIECES_SCRAP) SP from V_JOB_DETAIL where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSP", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory", "SP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictSP", "JS", "SP")
+	F.Data.Dictionary.Close("dictSP")
+	
+	'Dictionary to get the sum of setup hours for a job (just labor seqs)
+	F.Data.Dictionary.CreateFromSQL("dictSetUp", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(SETUP) from V_JOB_OPERATIONS where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSetUp", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory", "SETUP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictSetUp", "JS", "SETUP")
+	F.Data.Dictionary.Close("dictSetUp")
+	
+	'Dictionary to get the sum of actual setup hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictSetUpAct", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) from V_JOB_DETAIL where LMO = 'L' and FLAG_INDIRECT = 'S' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSetUpAct", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory", "ACTUAL_SETUP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictSetUpAct", "JS", "ACTUAL_SETUP")
+	F.Data.Dictionary.Close("dictSetUpAct")
+	
+	'Dictionary to get the sum of estimated run hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictRunHours", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, (SUM(HOURS_ESTIMATED)-SUM(SETUP)) RUN from V_JOB_OPERATIONS where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictRunHours", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory", "RUN", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictRunHours", "JS", "RUN")
+	F.Data.Dictionary.Close("dictRunHours")
+	
+	'Dictionary to get unattended hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictUH", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) UH from V_JOB_DETAIL where EMPLOYEE = 'UNATTENDED O/H' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictUH", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory", "UH", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictUH", "JS", "UH")
+	F.Data.Dictionary.Close("dictUH")
+	
+	'Dictionary to get regular hours for a job
+	'F.Data.Dictionary.CreateFromSQL("dictRH", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) RH from V_JOB_DETAIL where EMPLOYEE <> 'UNATTENDED O/H' group by JOB, SUFFIX")
+	'F.Data.Dictionary.SetDefaultReturn("dictRH", "0.0")
+	'F.Data.DataTable.AddColumn("dtWOHistory", "RH", "Float")
+	'F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictRH", "JS", "RH")
+	'F.Data.Dictionary.Close("dictRH")
+	
+	F.ODBC.Connection!Con.Close
+	
+	'Calling dictionaries for history data if option is checked
+	F.Intrinsic.Control.If(V.Screen.FormWOHist!chkHistory.Value,=,1)
+		F.Intrinsic.Control.CallSub("CallDictHistory")
+	F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.CallDictionaries.End
+Program.Sub.CallDictHistory.Start
+F.Intrinsic.Control.Try
+
+	F.ODBC.Connection!Con.OpenCompanyConnection
+	
+	'Dictionary to get the sum of scrap pieces for a job
+	F.Data.Dictionary.CreateFromSQL("dictSP", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(PIECES_SCRAP) SP from V_JOB_HIST_DTL where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSP", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory1", "SP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory1", "dictSP", "JS", "SP")
+	F.Data.Dictionary.Close("dictSP")
+	
+	'Dictionary to get the sum of setup hours for a job (just labor seqs)
+	F.Data.Dictionary.CreateFromSQL("dictSetUp", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(SETUP) from V_JOB_HIST_OPS where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSetUp", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory1", "SETUP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory1", "dictSetUp", "JS", "SETUP")
+	F.Data.Dictionary.Close("dictSetUp")
+	
+	'Dictionary to get the sum of actual setup hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictSetUpAct", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) from V_JOB_HIST_DTL where LMO = 'L' and FLAG_INDIRECT = 'S' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictSetUpAct", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory1", "ACTUAL_SETUP", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory1", "dictSetUpAct", "JS", "ACTUAL_SETUP")
+	F.Data.Dictionary.Close("dictSetUpAct")
+	
+	'Dictionary to get the sum of estimated run hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictRunHours", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, (SUM(HOURS_ESTIMATED)-SUM(SETUP)) RUN from V_JOB_HIST_OPS where LMO = 'L' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictRunHours", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory1", "RUN", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory1", "dictRunHours", "JS", "RUN")
+	F.Data.Dictionary.Close("dictRunHours")
+	
+	'Dictionary to get unattended hours for a job
+	F.Data.Dictionary.CreateFromSQL("dictUH", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) UH from V_JOB_HIST_DTL where EMPLOYEE = 'UNATTENDED O/H' group by JOB, SUFFIX")
+	F.Data.Dictionary.SetDefaultReturn("dictUH", "0.0")
+	F.Data.DataTable.AddColumn("dtWOHistory1", "UH", "Float")
+	F.Data.DataTable.FillFromDictionary("dtWOHistory1", "dictUH", "JS", "UH")
+	F.Data.Dictionary.Close("dictUH")
+	
+	''Dictionary to get regular hours for a job
+	'F.Data.Dictionary.CreateFromSQL("dictRH", "Con", "select concat(RTRIM(JOB), RTRIM(SUFFIX)) JS, SUM(HOURS_WORKED) RH from V_JOB_HIST_DTL where EMPLOYEE <> 'UNATTENDED O/H' group by JOB, SUFFIX")
+	'F.Data.Dictionary.SetDefaultReturn("dictRH", "0.0")
+	'F.Data.DataTable.FillFromDictionary("dtWOHistory", "dictRH", "JS", "RH")
+	'F.Data.Dictionary.Close("dictRH")
+	
+	F.ODBC.Connection!Con.Close
+
+	'Merge dts into one
+	F.Data.DataTable.Merge("dtWOHistory1", "dtWOHistory", True, 2)
+	F.Data.DataTable.Close("dtWOHistory1")
+	
+F.Intrinsic.Control.Catch
+
+	F.Intrinsic.Control.CallSub(CatchError)
+	
+F.Intrinsic.Control.EndTry
+
+Program.Sub.CallDictHistory.End
+Program.Sub.PartBrowser.Start
+'Browser that allows the user to select any part they want
+
+V.Local.sTitle.Declare(String)
+V.Local.iWidth.Declare(Long)
+V.Local.sSQL.Declare(String)
+
+V.Local.sPart.Declare(String)
+V.Local.sRev.Declare(String)
+V.Local.iPart.Declare(Long)
+V.Local.iRev.Declare(Long)
+
+V.Local.sTitle.Set("Part Selection")
+V.Local.iWidth.Set(100)
+
+F.ODBC.Connection!Con.OpenCompanyConnection
+F.Intrinsic.UI.Browser("Part Selection","Con","select distinct PART from V_INVENTORY_MSTR", V.Local.sTitle, V.Local.iWidth, V.Global.sPart)
+F.ODBC.Connection!Con.Close
+
+F.Intrinsic.Control.If(V.Global.sPart.IsCancel)
+	F.Intrinsic.UI.Msgbox("Please choose a part to load dashboard", "Part Not Selected")
+	F.IntrinsiC.Control.End
+F.Intrinsic.Control.EndIf
+
+GUI.FormWOHist.txt_Part.Text(V.Global.sPart)
+
+'Adding PartNo and Rev variables
+F.Intrinsic.String.Left(V.Global.sPart, 17, V.Global.sPartNo)
+F.Intrinsic.String.Right(V.Global.sPart, 3, V.Global.sRev)
+
+Program.Sub.PartBrowser.End
+Program.Sub.cmdBrowse_Click.Start
+'This subroutine allows the user to switch between parts once the dashboard is opened
+
+F.Intrinsic.Control.CallSub(PartBrowser)
+F.Intrinsic.Control.CallSub(cmdRefresh_Click)
+
+Program.Sub.cmdBrowse_Click.End
+Program.Sub.ExportCheckbox.Start
+V.Local.iCounter.Declare(Long)
+
+'Adding new column to display export checkbox
+F.Data.DataTable.AddColumn("dtWOHistory", "EXPORT", "Boolean", False)
+
+'Export checkbox set to true for first 5 records
+F.Intrinsic.Control.For(V.Local.iCounter, 0, V.DataTable.dtWOHistory.RowCount--, 1) 
+	F.Intrinsic.Control.If(V.Local.iCounter,<, 5)
+		F.Data.DataTable.SetValue("dtWOHistory", V.Local.iCounter, "EXPORT", True)
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Next(V.Local.iCounter)
+Program.Sub.ExportCheckbox.End
+
+Program.Sub.Comments.Start
+${$5$}$20.1.8249.18654$}$1
+${$6$}$triley$}$20220812150842057$}$iK6nerqp9nur1h1iSBfRKBBz1ENCgYv6h8NLmxyzzeN2X2yZ5RowXrY1iUoqfgfYI/9he1kWJq8=
+Program.Sub.Comments.End
